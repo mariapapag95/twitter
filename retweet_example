@@ -1,0 +1,56 @@
+mk dir retweet_example
+cd
+mkdir run setup test upstart
+touch run/wsgi.py
+mkdir run/src
+mkdir -p run/src/templates/public
+mkdirrun/src/tempaltes/private
+cd retweet_example
+mv ~/run .
+mv ~/setup .
+mv ~/test .
+mv ~/upstart .
+
+
+pwd = retweet_example
+virtualenv -p python3 --no-site-packages run/lib
+source run/lib/bin/activate
+
+echo $VIRTUAL_ENV
+retween_example/run/lib
+pip3 install numpy pandsas flask requests
+#Now you are in virtual environment
+pip3 freeze > setup/requirements.txt
+pip3 list --format-columns
+touch setup/staging.sh
+touch setup/production.sh
+chmod +x setup/*.sh
+
+
+nano setup/staging.sh
+
+
+#!/usr/bin/env bash
+
+apt-get -y update
+
+#required 
+#pythons dependencies 
+apt-get -y install python3-pip
+
+pip3 install -r setup/requirements.txt
+#recommended
+
+apt-get -y install tmux lotop iftop htop glances screenfetch
+
+
+
+
+
+
+cp setup/staging.sh setup/production.sh 
+
+REMOTE_USERNAME = 'maria'
+REMOTE_HOSTNAME = 'papag'
+ssh $REMOTE_USERNAME@$REMOTE_HOSTNAME:22/
+ssh $REMOTE_USERNAME@$REMOTE_HOSTNAME:/ 'bash -s' < setup/staging.sh
