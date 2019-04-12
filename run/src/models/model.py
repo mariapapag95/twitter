@@ -1,6 +1,6 @@
 from ..mappers.mapper import Database
 import sqlite3
-import time
+import datetime
 
 class User:
 
@@ -39,43 +39,64 @@ class User:
                     return False
 
     def tweet(self, tweet):
-        time_ = time.time()
+        time_ = datetime.datetime.now()
+        time_ = time_.strftime("%c")
         if len(tweet) < 240:
             with Database() as db: 
-                db.cursor.execute('''INSERT INTO tweets (username, tweet, time)
-                                    VALUES (?, ?, ?);''',
-                                    (self.username, tweet, time_))
+                db.cursor.execute('''INSERT INTO tweets (username, tweet, original_poster, time)
+                                    VALUES (?, ?, ?, ?);''',
+                                    (self.username, tweet, self.username, time_))
+                db.cursor.execute('''UPDATE tweets SET original_tweet_id = tweet_id WHERE tweet = "{tweet}";'''
+                                    .format(tweet = tweet))
                 return True
         else:
             return False
 
     def retweet(self, tweet_id):
-        time_ = time.time()
+        time_ = datetime.datetime.now()
+        time_ = time_.strftime("%c")
         with Database() as db:
-            db.cursor.execute('''SELECT username FROM tweets WHERE tweet_id={tweet_id};'''
-                                .format(tweet_id = int(tweet_id)))
-            retweeted_from = db.cursor.fetchone()
-            db.cursor.execute('''SELECT tweet FROM tweets WHERE tweet_id={tweet_id};'''
-                                .format(tweet_id = int(tweet_id)))
-            text = db.cursor.fetchone()
-            db.cursor.execute('''SELECT likes FROM tweets WHERE tweet_id={tweet_id};'''
-                                .format(tweet_id = int(tweet_id)))
-            likes = db.cursor.fetchone()
-            db.cursor.execute('''SELECT retweets FROM tweets WHERE tweet_id={tweet_id};'''
-                                .format(tweet_id = int(tweet_id)))
-            retweets = db.cursor.fetchone()
+            # UPDATE RETWEETS OF ORIGINAL TWEET AND THE RETWEETED TWEET
             db.cursor.execute('''UPDATE tweets SET retweets = retweets + 1 WHERE tweet_id={tweet_id};'''
+                                    .format(tweet_id = int(tweet_id)))
+            # GET DATA OF TWEET YOU ARE RETWEETING
+            db.cursor.execute('''SELECT * FROM tweets WHERE tweet_id={tweet_id};'''
                                 .format(tweet_id = int(tweet_id)))
-            retweet = "@" + (retweeted_from[0]) + ': "' + (text[0]) + '"'
-            db.cursor.execute('''INSERT INTO tweets (username, tweet, time, likes, retweets)
-                                    VALUES (?, ?, ?, ?, ?);''',
-                                    (self.username, retweet, time_,int(likes[0]),int(retweets[0])+1))
-            return True
+            tweet = db.cursor.fetchall()
+            tweet = tweet[0]
+            db.cursor.execute('''INSERT INTO retweets (user_who_retweeted, tweet_id, time)
+                                    VALUES(?,?,?);''',
+                                    (self.username, tweet[4], time_))
+            if tweet[3] == None:
+                # RETWEETING AN ORIGINAL TWEET
+                db.cursor.execute('''INSERT INTO tweets (username, tweet, retweeted_from, original_tweet_id, original_poster, time, likes, retweets)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?);''',
+                                        (self.username, '"'+tweet[2]+'"', tweet[1], tweet[0], tweet[1], time_, tweet[7], tweet[8]))
+                return True
+            else: 
+                # RETWEETING A RETWEET
+                db.cursor.execute('''INSERT INTO tweets (username, tweet, retweeted_from, original_tweet_id, original_poster, time, likes, retweets)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?);''',
+                                        (self.username, tweet[2], tweet[1], tweet[4], tweet[5], time_, tweet[7], tweet[8]))
+                db.cursor.execute('''UPDATE tweets SET retweets = {retweets} WHERE tweet_id = {original_tweet_id};'''
+                                    .format(retweets = tweet[8], original_tweet_id = tweet[4]))
+                return True
 
     def like(self, tweet_id):
-        with Database() as db:    
-            db.cursor.execute('''UPDATE tweets SET likes = likes + 1 WHERE tweet_id={tweet_id};'''
+        time_ = datetime.datetime.now()
+        time_ = time_.strftime("%c")
+        # NEEDS TO UPDATE LIKES ON ORIGINAL TWEET AS WELL
+        # SELECT USING THE TWEET ID TO FIND THE ORIGINAL ID
+        # THEN UPDATE WHERE ORIGINALID = ORIGINALID
+        with Database() as db:
+            db.cursor.execute('''SELECT original_tweet_id FROM tweets WHERE tweet_id={tweet_id};'''
                                 .format(tweet_id = int(tweet_id)))
+            original_tweet_id = db.cursor.fetchone()
+            db.cursor.execute('''INSERT INTO likes (user_who_liked, tweet_id, time)
+                                    VALUES(?,?,?);''',
+                                    (self.username, original_tweet_id[0], time_))
+            db.cursor.execute('''UPDATE tweets SET likes = likes + 1 WHERE original_tweet_id={original_tweet_id};'''
+                                .format(original_tweet_id = int(original_tweet_id[0])))
             return True
 
     def user_tweets(self):

@@ -76,15 +76,17 @@
 
   <div class="collapse navbar-collapse" id="navbarsExample03">
     <ul class="navbar-nav mr-auto">
-
+        {% if tweet[2] %}
+        <a class="nav-link" href="/{{ tweet[3] }}"> retweeted {{ tweet [3] }}<span class="sr-only">(current)</span></a>
+        {% endif %}
         <a class="nav-link" href="/{{ tweet[0] }}">{{ tweet[2] }} <span class="sr-only">(current)</span></a>
 
       </ul>
       <form action="/dashboard" method="post">
-      <div><button name="like" value="{{ tweet [0]}}" class="btn btn-sm btn-primary btn-block" type="submit">Like {{ tweet[4] }}</button></div>
+      <div><button name="like" value="{{ tweet [0]}}" class="btn btn-sm btn-primary btn-block" type="submit">Like {{ tweet[7] }}</button></div>
     </form>
     <form action="/dashboard" method="post">
-      <div><button name="retweet" value="{{ tweet[0] }}" class="btn btn-sm btn-primary btn-block" type="submit">Retweet {{ tweet[5] }}</button></div>
+      <div><button name="retweet" value="{{ tweet[0] }}" class="btn btn-sm btn-primary btn-block" type="submit">Retweet {{ tweet[8] }}</button></div>
     </form>
     
       

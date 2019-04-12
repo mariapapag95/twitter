@@ -45,6 +45,8 @@ def login():
             error = "Username or password inccorect. Try again."
             return render_template('login.html', message=error)
 
+"""
 @controller.route('/<username>',methods=['GET','POST'])
 def userpage():
     pass
+"""

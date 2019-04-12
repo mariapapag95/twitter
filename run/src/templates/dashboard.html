@@ -60,9 +60,10 @@
 <div>
 <main role="main" class="container">
   <div class="jumbotron">
+    {{ message }}
     <h1>Twatter</h1>
             <form action="/dashboard" method="post">
-                <input class="form-control mr-lg-2" name="tweet" placeholder="What's on your mind? {{ length }}" required>
+                <input class="form-control mr-lg-2" name="tweet" placeholder="What's on your mind? {{ length }}" required autofocus>
                 <button class="btn btn-outline-info mr-lg-2" type="submit">Twat it</button>
            </form>
            
@@ -80,16 +81,20 @@
 
   <div class="collapse navbar-collapse" id="navbarsExample03">
     <ul class="navbar-nav mr-auto">
-
+        {% if tweet[2] %}
+      <a class="nav-link" href="/{{ tweet[3] }}"> retweeted {{ tweet [3] }}<span class="sr-only">(current)</span></a>
+      {% endif %}
         <a class="nav-link" href="/{{ tweet[0] }}">{{ tweet[2] }} <span class="sr-only">(current)</span></a>
 
       </ul>
+      <div>{{ tweet[6] }}</div>
       <form action="/dashboard" method="post">
-      <div><button name="like" value="{{ tweet [0]}}" class="btn btn-sm btn-primary btn-block" type="submit">Like {{ tweet[4] }}</button></div>
+      <div><button name="like" value="{{ tweet [0]}}" class="btn btn-sm btn-primary btn-block" type="submit">Like {{ tweet[7] }}</button></div>
     </form>
     <form action="/dashboard" method="post">
-      <div><button name="retweet" value="{{ tweet[0] }}" class="btn btn-sm btn-primary btn-block" type="submit">Retweet {{ tweet[5] }}</button></div>
+      <div><button name="retweet" value="{{ tweet[0] }}" class="btn btn-sm btn-primary btn-block" type="submit">Retweet {{ tweet[8] }}</button></div>
     </form>
+
     
       
   </div>

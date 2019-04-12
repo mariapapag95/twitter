@@ -9,21 +9,11 @@ def dashboard():
     alltweets = t.alltweets()
     if request.method == 'GET':
         return render_template('dashboard.html', alltweets=alltweets)
-        """
-        if "username" in session:
-            off = "submit"
-            return render_template('dashboard.html', alltweets=alltweets, hidden = off)
-        else:
-            on = "hidden"
-            return render_template('dashboard.html', alltweets=alltweets, hidden = on)
-        """
     elif request.method == 'POST':
         try:
             tweet = request.form.get('tweet')
-            #length = 240 - len(tweet)
             retweet = request.form.get('retweet')
             like = request.form.get('like')
-            print(like)
             u = User(session["username"])
             if retweet:
                 if u.retweet(retweet):
@@ -34,12 +24,12 @@ def dashboard():
             if u.tweet(tweet):
                 return redirect(url_for('private.dashboard'))
             else:
-                message = "Your tweet is too long."
-                return render_template('dashboard.html', alltweets=alltweets,message=message)      
-        # HANDLES FOR PEOPLE TRYING TO TWEET WHENT THEY ARE NOT LOGGED IN
+                message = "Your tweet is too long. Character limit 240."
+                return render_template('dashboard.html', alltweets=alltweets, message=message)      
+        # HANDLES FOR PEOPLE TRYING TO TWEET WHEN THEY ARE NOT LOGGED IN
         # FIXME: CREATE JINJA CONDITION TO NOT DISPLAY INPUT BOX UNLESS THE USER IS LOGGED IN (SESSION DATA)
         except KeyError:
-            return redirect(url_for('private.frontpage'))
+            return redirect(url_for('public.frontpage'))
 
 @controller.route('/user', methods=['GET','POST'])
 def mypage():
@@ -61,7 +51,7 @@ def mypage():
             if u.tweet(tweet):
                 return redirect(url_for('private.mypage'))
             else:
-                message = "Your tweet is too long."
+                message = "Your tweet is too long. Character limit 240."
                 return render_template('user.html', user_tweets = user_tweets,message=message)    
     # HANDLES FOR PEOPLE TRYING TO TWEET WHENT THEY ARE NOT LOGGED IN
     # FIXME: CREATE JINJA CONDITION TO NOT DISPLAY INPUT BOX UNLESS THE USER IS LOGGED IN (SESSION DATA)
